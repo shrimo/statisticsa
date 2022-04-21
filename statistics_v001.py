@@ -16,9 +16,7 @@ city_list = ['L*vivs*ka', 'Kryvoriz*ka', 'Vinnyc*ka', 'Pervomajs*ka', 'Kyïvs*ka
 # print (city_list)
 
 out_list = []
-
-# def repr_dict(d):
-#     return '{%s}' % ',\n'.join("'%s': '%s'" % pair for pair in d.iteritems())
+data_time = '2022-03'
 
 with open('result.json') as fp:
     data = json.load(fp)
@@ -30,7 +28,7 @@ for key in data.items():
         if type(i) is list:
             for l in i:
                 if l.get('type') == 'message':
-                    # print ('data: '+l.get('date'))
+                    # print ('data: '+l.get('date'))                                            
                     text1 = l.get('text')
                     latin_text = cyrtranslit.to_latin(text1[0].get('text'), 'ua').replace("'",'*')
                     # print (latin_text)
@@ -38,18 +36,20 @@ for key in data.items():
                         # print (latin_text)
                         for st in latin_text.split():
                             # print (st)
-                            if st in city_list:
-                                out_list.append(st)
+                            if st in city_list: #check city list
+                                if data_time in l.get('date'): #check data/time
+                                    # print ('data: '+l.get('date')) 
+                                    out_list.append(st)
 
 count_list = Counter(out_list)
 count_list_sort = dict(sorted(count_list.items(), key=lambda item: item[1]))
+
+# print (count_list_sort)
 plt.bar(*zip(*count_list_sort.items()))
 plt.xticks(rotation=90, fontsize=10, fontname='monospace')
+plt.subplots_adjust(bottom=0.35)
+# print (dir(plt))
+plt.title('Data: '+data_time)
 plt.show()
 # for k, v in count_list_sort.items():
 #     print (k, v)
-                
-
-                    
-
-
