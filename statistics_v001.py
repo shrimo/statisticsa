@@ -12,11 +12,21 @@ import matplotlib.pyplot as plt
 
 city_list = ['L*vivs*ka', 'Kryvoriz*ka', 'Vinnyc*ka', 'Pervomajs*ka', 'Kyïvs*ka', 'Pokrovs*kyj', 'Zaporiz*ka', 'Xarkivs*ka'
 , 'Xarkivs*ka', 'Ivano-Frankivs*ka', 'Žytomyrs*ka', 'Sums*ka', 'Dnipropetrovs*ka', 'Ternopil*s*ka', 'Kyïv', 'Mykolaïv', 'Černihivs*ka'
-, 'Pervomajs*kyj', 'Xmel*nyc*ka', 'Voznesens*k', 'Odes*ka', 'Zakarpats*ka', 'Čerkas*ka', 'Velykonovosilkivs*ka', 'Donec*ka', 'Rivnens*ka']
+, 'Pervomajs*kyj', 'Xmel*nyc*ka', 'Voznesens*k', 'Odes*ka', 'Zakarpats*ka', 'Čerkas*ka', 'Velykonovosilkivs*ka', 'Donec*ka', 'Rivnens*ka'
+, 'Južnoukraïns*k', 'Kryvyj', 'Mykolaïvs*ka', 'Baxmuts*kyj', 'Volyns*ka', 'Vuhledars*ka', 'Starokostjantyniv', 'Dobropil*s*ka']
 
 # print (city_list)
+def parsing_stringa(stringa, data_time,list_main):
+    out_list = []
+    latin_text = cyrtranslit.to_latin(stringa, 'ua').replace("'",'*')    
+    if 'Povitrjana tryvoha' in latin_text:        
+        for st in latin_text.split():            
+            if st in city_list: #check city list
+                if data_time in list_main.get('date'): #check data/time                    
+                    out_list.append(st)
+    return out_list
 
-def export_data(data_time, file_name):
+def export_data(data_time, file_name):    
     out_list = []
     with open(file_name) as fp:
         data = json.load(fp)
@@ -26,40 +36,55 @@ def export_data(data_time, file_name):
     for key in data.items():
         for i in key:        
             if type(i) is list:
-                for l in i:
-                    if l.get('type') == 'message':
-                        # print ('data: '+l.get('date'))                                            
-                        text1 = l.get('text')
-                        latin_text = cyrtranslit.to_latin(text1[0].get('text'), 'ua').replace("'",'*')
-                        # print (latin_text)
-                        if 'Povitrjana tryvoha' in latin_text:
-                            # print (latin_text)
-                            for st in latin_text.split():
-                                # print (st)
-                                if st in city_list: #check city list
-                                    if data_time in l.get('date'): #check data/time
-                                        # print ('data: '+l.get('date')) 
-                                        out_list.append(st)
+                for list_main in i:
+                    if list_main.get('type') == 'message':                        
+                        text1 = list_main.get('text')
+                        # print (type(text1[0]))
+                        if type(text1[0]) is dict:
+                            latin_text = cyrtranslit.to_latin(text1[0].get('text'), 'ua').replace("'",'*')                            
+                            if 'Povitrjana tryvoha' in latin_text:                                
+                                for st in latin_text.split():
+                                    # print (st)                         
+                                    if st in city_list: #check city list
+                                        if data_time in list_main.get('date'): #check data/time                                            
+                                            out_list.append(st)      
+                        elif type(text1[0]) is str: # new date format          
+                            latin_text = cyrtranslit.to_latin(text1[0], 'ua').replace("'",'*')                            
+                            if 'Povitrjana tryvoha' in latin_text:                                
+                                for st in latin_text.split():                                    
+                                    if st in city_list: #check city list
+                                        if data_time in list_main.get('date'): #check data/time                                            
+                                            out_list.append(st)
+
 
     count_list = Counter(out_list)
-    return dict(sorted(count_list.items(), key=lambda item: item[1]))
+    return dict(sorted(count_list.items(), key=lambda item: item[1]))    
 
-# print (count_list_sort)
-data_time_01 = '2022-04'
-data_time_02 = '2022-03'
-count_list_sort_01 = export_data(data_time_01, 'result.json')
-count_list_sort_02 = export_data(data_time_02, 'result.json')
+data_time = ['2022-03', '2022-04']
 
-# X_axis = np.arange(len(count_list_sort_01.keys()))
+count_list_sort_01 = export_data(data_time[1], 'result.json')
+# print (len(count_list_sort_01))
+# X_key_01 = list(count_list_sort_01.keys())
+# Y_key_01 = list(count_list_sort_01.values())
 
-plt.bar(*zip(*count_list_sort_01.items()), label = '2022-04')
-plt.bar(*zip(*count_list_sort_02.items()), label = '2022-03')
+# count_list_sort_02 = export_data(data_time_02, 'result.json')
+# X_key_02 = list(count_list_sort_02.keys())
+# Y_key_02 = list(count_list_sort_02.values())
+
+# print (len(count_list_sort_01))
+# X_axis_01 = np.arange(len(count_list_sort_01.keys()))
+# X_axis_02 = np.arange(len(count_list_sort_02.keys()))
+
+# plt.bar(X_axis_01+0.2, Y_key_01, label = '2022-04', width=0.3)
+# plt.bar(X_axis_02-0.2, Y_key_02, label = '2022-03', width=0.3)
+plt.bar(*zip(*count_list_sort_01.items()), label = data_time[1])
+# plt.bar(*zip(*count_list_sort_02.items()), label = '2022-03')
 
 plt.xticks(rotation=90, fontsize=10, fontname='monospace')
-plt.subplots_adjust(bottom=0.35)
-# print (dir(plt))
-plt.title('Data: '+data_time_01+' - '+data_time_02)
+plt.subplots_adjust(bottom=0.36)
+plt.title('Data: '+data_time[1]) #+' - '+data_time[1])
 plt.legend()
 plt.show()
+
 # for k, v in count_list_sort.items():
 #     print (k, v)
