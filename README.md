@@ -3,3 +3,5 @@
 data analysis, graphs, time
 
 ![statisticsa image](https://github.com/shrimo/statisticsa/blob/main/sc.png)
+
+![statisticsa image](https://github.com/shrimo/statisticsa/blob/main/dist.png)
